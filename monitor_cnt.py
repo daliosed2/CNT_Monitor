@@ -1,4 +1,4 @@
-
+# monitor_cnt.py
 import requests
 from bs4 import BeautifulSoup
 import os
@@ -76,9 +76,14 @@ def enviar_mensaje_discord(nuevos_articulos):
 
 def obtener_articulos_actuales():
     """Obtiene los enlaces de todos los artículos PDF de la página de CNT."""
+    # Añadimos una cabecera para simular un navegador real y evitar bloqueos.
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    }
     try:
-        respuesta = requests.get(URL, timeout=15)
-        respuesta.raise_for_status()
+        # Hacemos la petición incluyendo la cabecera
+        respuesta = requests.get(URL, timeout=15, headers=headers)
+        respuesta.raise_for_status() # Lanza un error si la respuesta no es exitosa (ej. 403, 404)
         soup = BeautifulSoup(respuesta.text, 'html.parser')
         return {a['href'] for a in soup.select('article a[href]')}
     except requests.RequestException as e:
@@ -95,6 +100,8 @@ def main():
     
     articulos_actuales = obtener_articulos_actuales()
     if articulos_actuales is None:
+        # Si la función devuelve None, es porque hubo un error de conexión.
+        # Salimos con código 1 para que el workflow de GitHub marque el error.
         sys.exit(1)
 
     nuevos_articulos = articulos_actuales - articulos_conocidos
@@ -111,14 +118,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-```
-
-### **Pasos a Seguir**
-
-1.  **Reemplaza el Código:** Ve a tu repositorio en GitHub, abre el archivo `monitor_cnt.py` y reemplaza todo su contenido con el código que te acabo de dar.
-2.  **Guarda los Cambios:** Haz "Commit" de los cambios para guardarlos en tu repositorio.
-3.  **Prueba de Nuevo:** Ahora, para la prueba de fuego, vuelve a ejecutar el workflow manualmente desde la pestaña "Actions".
-
-Esta vez, en lugar de un solo mensaje fallido, deberías empezar a recibir en Discord una serie de mensajes, cada uno con una parte de la lista de los 824 artículos, hasta que se completen todos.
-
-¡Con este cambio, tu bot será mucho más robusto y estará listo para cualquier cantidad de actualizacion
