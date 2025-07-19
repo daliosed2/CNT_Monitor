@@ -1,43 +1,20 @@
-# .github/workflows/monitor.yml
-name: Monitor de Repositorio Legal CNT
-
+name: CNT Monitor
 on:
-  workflow_dispatch:
   schedule:
-    # Ejecuta el workflow cada 2 horas, de lunes a viernes.
-    - cron: '0 */2 * * 1-5'
+    - cron: '0 */3 * * *'    # cada 3 h, todos los días (UTC)
+  workflow_dispatch:
 
 jobs:
-  check-updates:
+  run:
     runs-on: ubuntu-latest
-    
-    permissions:
-      contents: write
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install requests beautifulsoup4
-
-      - name: Run monitor script
+          python-version: '3.12'
+      - run: |
+          python -m pip install -U pip
+          pip install requests beautifulsoup4 python-dotenv
+      - run: python cnt_monitor.py
         env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        run: python monitor_cnt.py
-
-      - name: Commit and push if changed
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add articulos_conocidos.txt
-          # Solo hace commit si hay cambios en el archivo
-          git diff --staged --quiet || git commit -m "Actualizar historial de artículos"
-          git push
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
