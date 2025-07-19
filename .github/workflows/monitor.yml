@@ -4,11 +4,16 @@ name: Monitor de Repositorio Legal CNT
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 * * * *'
+    # Ejecuta el workflow cada 2 horas, de lunes a viernes.
+    - cron: '0 */2 * * 1-5'
 
 jobs:
   check-updates:
     runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -33,5 +38,6 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add articulos_conocidos.txt
+          # Solo hace commit si hay cambios en el archivo
           git diff --staged --quiet || git commit -m "Actualizar historial de artículos"
           git push
