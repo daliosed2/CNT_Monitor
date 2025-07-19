@@ -49,11 +49,36 @@ def cargar_estado():
 def guardar_estado(ids):
     STATE_FILE.write_text(json.dumps(list(ids), indent=2, ensure_ascii=False))
 
-def notify(msg:str):
+import os, re, requests
+from datetime import datetime
+
+# ------------------------------------------------------------------
+# FUNCIÓN DEBUG → imprime posibles causas si no llega al webhook
+# ------------------------------------------------------------------
+def notify(msg: str):
+    # Consola en el runner (ASCII-safe para evitar warnings)
     ts = datetime.now().strftime("[%d/%m %H:%M] ")
     print(ts + re.sub(r"[^\x00-\x7F]", " ", msg))
-    if WEBHOOK:
-        requests.post(WEBHOOK, json={"content": msg}, timeout=10)
+
+    # Lee la variable que viene del secreto
+    webhook = os.getenv("DISCORD_WEBHOOK_URL", "").strip()
+
+    if not webhook:
+        print("⚠️  WEBHOOK vacía: revisa el secreto DISCORD_WEBHOOK_URL")
+        return
+
+    try:
+        r = requests.post(
+            webhook,
+            json={"content": msg},
+            timeout=10
+        )
+        if r.status_code >= 400:
+            # Muestra código + primeros 100 caracteres de la respuesta
+            print(f"⚠️  Discord devolvió {r.status_code}: {r.text[:100]}")
+    except Exception as e:
+        print("⚠️  Excepción enviando a Discord:", e)
+
 
 def run_once():
     conocidos=set(cargar_estado())
