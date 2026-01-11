@@ -84,7 +84,7 @@ def notify(msg: str):
     try:
         r = requests.post(WEBHOOK, json={"content": msg}, timeout=10)
         if r.status_code >= 400:
-            print(f"⚠️  Discord {r.status_code}: {r.text[:100]}")
+            print(f"⚠️  Discord {r.status_code}: {r.text[:100]}") 
     except Exception as e:
         print("⚠️  Excepción enviando a Discord:", e)
 
