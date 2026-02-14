@@ -65,6 +65,7 @@ def obtener_documentos():
         docs.append({"id": href, "titulo": title, "url": href, "fecha": fecha})
     docs.sort(key=lambda d: d["fecha"], reverse=True)
     return docs[:10]     # solo los 10 más recientes
+    
 
 # ───────── ESTADO LOCAL ─────────
 def cargar_estado():
