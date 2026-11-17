@@ -2,8 +2,8 @@ name: CNT Monitor
 
 on:
   schedule:
-    # ── minuto 0, cada 12h, todos los días (UTC) ──
-    - cron: '0 14 * * 1-5'
+    # Lunes a viernes, 09:00 America/Guayaquil (14:00 UTC).
+    - cron: '0 14 * * MON-FRI'
   workflow_dispatch:        # botón “Run workflow”
 
 jobs:
